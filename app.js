@@ -25,16 +25,31 @@ const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
 const MongoDBStore=require("connect-mongo")(session);
 
 
+import fs from "fs";
+import tls from "tls";
 
+tls.DEFAULT_MIN_VERSION = "TLSv1.2"; // Render + Node20 TLS fix
 
 mongoose.set('strictQuery', true);
-mongoose.connect(dbUrl)
 
-const db=mongoose.connection;
-db.on("error",console.error.bind(console,"connection error:"));
-db.once("open",()=>{
-    console.log("Database connected");
-})
+async function connectDB() {
+    try {
+        // Render CA bundle fix
+        const ca = fs.readFileSync("/etc/ssl/certs/ca-certificates.crt");
+
+        await mongoose.connect(dbUrl, {
+            tls: true,
+            tlsCAFile: "/etc/ssl/certs/ca-certificates.crt",
+            serverSelectionTimeoutMS: 8000
+        });
+
+        console.log("Database connected");
+    } catch (err) {
+        console.error("Mongo connection error:", err);
+    }
+}
+
+connectDB();
 
 const app=express();
 const store= new MongoDBStore({
