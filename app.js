@@ -24,9 +24,8 @@ const mongoSanitize=require('express-mongo-sanitize');
 const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
 const MongoDBStore=require("connect-mongo")(session);
 
-
-import fs from "fs";
-import tls from "tls";
+const fs = require("fs");
+const tls = require("tls");
 
 tls.DEFAULT_MIN_VERSION = "TLSv1.2"; // Render + Node20 TLS fix
 
