@@ -33,15 +33,19 @@ mongoose.set('strictQuery', true);
 
 async function connectDB() {
     try {
-        // Render CA bundle fix
-        const ca = fs.readFileSync("/etc/ssl/certs/ca-certificates.crt");
-
-        await mongoose.connect(dbUrl, {
-            tls: true,
-            tlsCAFile: "/etc/ssl/certs/ca-certificates.crt",
+        // Production-ready MongoDB connection
+        let mongooseOptions = {
             serverSelectionTimeoutMS: 8000
-        });
-
+        };
+        // Use CA bundle only for Atlas/cloud connections and if file exists
+        const isAtlas = dbUrl && dbUrl.includes('mongodb+srv');
+        const caPath = "/etc/ssl/certs/ca-certificates.crt";
+        const useCA = isAtlas && process.platform !== 'win32' && require('fs').existsSync(caPath);
+        if (useCA) {
+            mongooseOptions.tls = true;
+            mongooseOptions.tlsCAFile = caPath;
+        }
+        await mongoose.connect(dbUrl, mongooseOptions);
         console.log("Database connected");
     } catch (err) {
         console.error("Mongo connection error:", err);
