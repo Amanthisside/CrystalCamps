@@ -120,7 +120,9 @@ app.get('/',(req,res)=>{
 app.use('/',userRoutes);
 app.use('/campgrounds',campgroundRoutes);
 app.use('/campgrounds/:id/reviews',reviewRoutes);
-
+app.get('/health', (req, res) => {
+    res.status(200).send("OK");
+});
 app.all('*',(req,res,next)=>{
     next( new ExpressError('Page Not Found',401))
     // res.send('404');
